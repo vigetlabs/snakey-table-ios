@@ -14,7 +14,12 @@ class SnakeyTableCell: UITableViewCell {
         reset()
     }
 
-    func renderSnakeyBoi(_ index: Int, last: Int) {
+    private func reset() {
+        path = UIBezierPath()
+        drawShapeLayer()
+    }
+
+    func render(_ index: Int, last: Int) {
         let isFirst = index == 0
 
         // These are counted with offsets to account for zero-based numbering
@@ -126,11 +131,6 @@ class SnakeyTableCell: UITableViewCell {
 
             self.shapeLayer.add(animation, forKey: nil)
         }
-    }
-
-    private func reset() {
-        path = UIBezierPath()
-        drawShapeLayer()
     }
 
 }

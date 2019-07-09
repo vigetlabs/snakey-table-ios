@@ -22,13 +22,8 @@ class HomeViewController: UITableViewController {
 
     // MARK: - Lifecycle
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
         shouldAnimateCells = false
     }
 
@@ -36,7 +31,7 @@ class HomeViewController: UITableViewController {
         tableView.register(PlaceCell.self, forCellReuseIdentifier: "PlaceCell")
     }
 
-    // MARK: - UITableViewDelate
+    // MARK: - UITableViewDelegate
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 44
@@ -55,7 +50,7 @@ class HomeViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if shouldAnimateCells, let placeCell = cell as? PlaceCell {
-            placeCell.renderSnakeyBoi(indexPath.row, last: places.count)
+            placeCell.render(indexPath.row, last: places.count)
             placeCell.animate(position: indexPath.row)
         }
     }
