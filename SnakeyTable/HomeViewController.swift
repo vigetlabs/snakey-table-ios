@@ -50,7 +50,7 @@ class HomeViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if shouldAnimateCells, let placeCell = cell as? PlaceCell {
-            placeCell.render(indexPath.row, last: places.count)
+            placeCell.render(position: indexPath.row, total: places.count)
             placeCell.animate(position: indexPath.row)
         }
     }

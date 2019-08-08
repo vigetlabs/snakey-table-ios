@@ -1,13 +1,22 @@
 import UIKit
 
-let SNAKEY_CELL_ANIM_DURATION: Double = 0.25
+let ANIM_DURATION: Double = 0.25
 
 class SnakeyTableCell: UITableViewCell {
 
     var xPadding: CGFloat = 36.0
     var path: UIBezierPath!
-    var shapeLayer = CAShapeLayer()
     let strokeColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0).cgColor
+    lazy var shapeLayer: CAShapeLayer = {
+        let sLayer = CAShapeLayer()
+        sLayer.fillColor = UIColor.clear.cgColor
+        sLayer.strokeColor = strokeColor
+        sLayer.lineWidth = 1.0
+        sLayer.strokeEnd = 1.0
+
+        layer.addSublayer(sLayer)
+        return sLayer
+    }()
 
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -16,16 +25,20 @@ class SnakeyTableCell: UITableViewCell {
 
     private func reset() {
         path = UIBezierPath()
-        drawShapeLayer()
+        updateShapeLayer()
     }
 
-    func render(_ index: Int, last: Int) {
-        let isFirst = index == 0
+    private func updateShapeLayer() {
+        shapeLayer.path = path.cgPath
+    }
+
+    func render(position: Int, total: Int) {
+        let isFirst = position == 0
 
         // These are counted with offsets to account for zero-based numbering
-        let isEven = (index + 1) % 2 == 0
-        let isLast = index + 1 == last
-        let isSecondLast = index + 2 == last
+        let isEven = (position + 1) % 2 == 0
+        let isLast = position + 1 == total
+        let isSecondLast = position + 2 == total
 
         // The last cell should not draw anything.
         if isLast {
@@ -36,21 +49,21 @@ class SnakeyTableCell: UITableViewCell {
         path = UIBezierPath()
 
         if isFirst {
-            drawFirstPath(path, last: last)
+            drawFirstPath(path, total: total)
         } else if isEven {
             drawEvenPath(path, isSecondLast: isSecondLast)
         } else {
             drawOddPath(path, isSecondLast: isSecondLast)
         }
 
-        drawShapeLayer()
+        updateShapeLayer()
     }
 
     /// Draws a line from the lower left to lower right of the first cell.
-    private func drawFirstPath(_ path: UIBezierPath, last: Int) {
+    private func drawFirstPath(_ path: UIBezierPath, total: Int) {
         let width = frame.size.width
         let height = frame.size.height
-        let padding = last == 2 ? 0.0 : xPadding
+        let padding = total == 2 ? 0.0 : xPadding
 
         path.move(to: CGPoint(x: 0.0, y: height))
         path.addLine(to: CGPoint(x: width - padding, y: height))
@@ -69,7 +82,7 @@ class SnakeyTableCell: UITableViewCell {
         path.addArc(
             withCenter: arcCenter,
             radius: arcRadius,
-            startAngle: -.pi / 2,
+            startAngle: 3 / 2 * .pi,
             endAngle: .pi / 2,
             clockwise: true
         )
@@ -90,7 +103,7 @@ class SnakeyTableCell: UITableViewCell {
         path.addArc(
             withCenter: arcCenter,
             radius: arcRadius,
-            startAngle: -.pi / 2,
+            startAngle: 3 / 2 * .pi,
             endAngle: .pi / 2,
             clockwise: false
         )
@@ -98,28 +111,12 @@ class SnakeyTableCell: UITableViewCell {
         path.addLine(to: CGPoint(x: isSecondLast ? width : (width - xPadding), y: height))
     }
 
-    private func drawShapeLayer() {
-        // We must remove the layer first to avoid stacking
-        shapeLayer.removeFromSuperlayer()
-
-        shapeLayer = CAShapeLayer()
-        shapeLayer.lineCap = .round
-        shapeLayer.lineJoin = .round
-        shapeLayer.path = path.cgPath
-        shapeLayer.fillColor = UIColor.clear.cgColor
-        shapeLayer.strokeColor = strokeColor
-        shapeLayer.lineWidth = 1.0
-        shapeLayer.strokeEnd = 1.0
-
-        layer.addSublayer(shapeLayer)
-    }
-
     func animate(position: Int) {
         // This is set to 0, so nothing in the path will be drawn initially.
         shapeLayer.strokeEnd = 0.0
 
         // The stagger value should start with a min. of 1, even if array index is 0.
-        let stagger = SNAKEY_CELL_ANIM_DURATION * Double(position + 1)
+        let stagger = ANIM_DURATION * Double(position + 1)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + stagger) {
             self.shapeLayer.strokeEnd = 1.0
@@ -127,7 +124,7 @@ class SnakeyTableCell: UITableViewCell {
             let animation = CABasicAnimation(keyPath: "strokeEnd")
             animation.fromValue = 0
             animation.toValue = 1
-            animation.duration = SNAKEY_CELL_ANIM_DURATION
+            animation.duration = ANIM_DURATION
 
             self.shapeLayer.add(animation, forKey: nil)
         }
